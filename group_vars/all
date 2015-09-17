@@ -1,0 +1,7 @@
+---
+dpdk_dir: /root/dpdk
+dpdk_build: '{{ dpdk_dir }}/x86_64-native-linuxapp-gcc'
+dpdk_repo: https://github.com/mixja/dpdk.git
+
+ovs_dir: /root/ovs
+ovs_repo: https://github.com/openvswitch/ovs.git

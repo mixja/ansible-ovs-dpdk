@@ -1,0 +1,5 @@
+#!/bin/bash
+ifdown {{ item.device_name }}
+modprobe uio
+insmod {{ item.dpdk_build }}/kmod/igb_uio.ko
+{{ item.dpdk_dir }}/tools/dpdk_nic_bind.py --bind=igb_uio {{ item.device_name }}

@@ -1,0 +1,6 @@
+#!/bin/bash
+ifdown {{ item.device_name }}
+modprobe vfio-pci
+chmod a+x /dev/vfio 
+chmod 0666 /dev/vfio/*
+{{ item.dpdk_dir }}/tools/dpdk_nic_bind.py --bind=vfio-pci {{ item.device_name }}

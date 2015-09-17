@@ -1,0 +1,7 @@
+---
+- include: custom_facts.yml
+- include: system_checks.yml
+- include: system_prerequisites.yml
+- include: hugepages.yml
+- include: dpdk.yml
+- include: ovs.yml

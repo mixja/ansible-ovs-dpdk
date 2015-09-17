@@ -1,0 +1,7 @@
+---
+- name: System Checks
+  hosts: all
+  tasks:
+    - name: Check hugepages support
+      fail: msg="Hugepage support was not detected on your system.  Hugepage support is required for DPDK."
+      when: ansible_local.hugepages.hugepages_1G == false and ansible_local.hugepages.hugepages_2M == false

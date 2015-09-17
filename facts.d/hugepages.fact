@@ -1,0 +1,18 @@
+#!/bin/bash
+hugepages_2M=false
+hugepages_1G=false
+
+if grep -q "pse" /proc/cpuinfo; then
+  hugepages_2M=true
+fi
+
+if grep -q "pdpe1gb" /proc/cpuinfo; then
+  hugepages_1G=true
+fi
+
+cat <<EOF
+{
+    "hugepages_2M" : $hugepages_2M,
+    "hugepages_1G" : $hugepages_1G
+}
+EOF

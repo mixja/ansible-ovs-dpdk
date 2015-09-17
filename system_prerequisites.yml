@@ -1,0 +1,31 @@
+- name: Install System Prerequisities
+  hosts: all
+  handlers:
+    - include: handlers/restart.yml
+  tasks:
+    - name: Apply system updates
+      dnf: name=* state=latest
+      notify: 
+        - restart machine
+        - wait for machine to restart
+    - name: Install application prerequisites
+      dnf: name='{{ item }}'
+      with_items:
+        - git
+        - kernel-devel 
+        - gcc
+        - dh-autoreconf
+        - openssl-devel
+    - name: Disable firewalld
+      service: >
+        name=firewalld
+        enabled=no
+        state=stopped
+    - name: Disable SELINUX
+      lineinfile: >
+        dest=/etc/selinux/config
+        regexp=^SELINUX=
+        line=SELINUX=disabled
+      notify: 
+        - restart machine
+        - wait for machine to restart

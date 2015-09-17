@@ -1,0 +1,38 @@
+---
+- name: Enable Hugepages
+  hosts: all
+  handlers:
+    - include: handlers/restart.yml
+  tasks:
+    - name: Add configuration to GRUB - 1G
+      lineinfile: >
+        dest=/etc/default/grub 
+        line='GRUB_CMDLINE_LINUX_DEFAULT="iommu=pt intel_iommu=on default_hugepagesz=1G hugepagesz=1G hugepages=1"' 
+        insertafter=EOF
+      register: grub_1G_changed
+      when: ansible_local.hugepages.hugepages_1G == true
+    - name: Add configuration to GRUB - 2M
+      lineinfile: >
+        dest=/etc/default/grub 
+        line='GRUB_CMDLINE_LINUX_DEFAULT="iommu=pt intel_iommu=on default_hugepagesz=2M hugepagesz=2M hugepages=1"' 
+        insertafter=EOF
+      register: grub_2M_changed
+      when: ansible_local.hugepages.hugepages_1G == false and ansible_local.hugepages.hugepages_2M == true
+    - name: Update GRUB configuration
+      command: grub2-mkconfig -o /etc/grub2-efi.cfg
+      notify: 
+        - restart machine
+        - wait for machine to restart
+      when: grub_1G_changed.changed or grub_2M_changed.changed
+    - name: Add hugepages mount to fstab - 1G
+      lineinfile: >
+        dest=/etc/fstab
+        line='hugetlbfs    /dev/hugepages    hugetlbfs    pagesize=1G 0 0'
+        insertafter=EOF
+      when: ansible_local.hugepages.hugepages_1G == true
+    - name: Add hugepages mount to fstab - 2M
+      lineinfile: >
+        dest=/etc/fstab
+        line='hugetlbfs    /dev/hugepages    hugetlbfs    defaults 0 0'
+        insertafter=EOF
+      when: ansible_local.hugepages.hugepages_1G == false and ansible_local.hugepages.hugepages_2M == true

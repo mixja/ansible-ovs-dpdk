@@ -1,0 +1,41 @@
+---
+- name: Install DPDK
+  hosts: all
+  tasks:
+    - name: Checkout patched DPDK 
+      git: >
+        repo={{ dpdk_repo }}
+        dest={{ dpdk_dir }}
+        version={{ dpdk_version | default("master") }}
+        update=no
+        force=yes
+      register: dpdk_changed
+    - name: Configure DPDK
+      lineinfile: >
+        dest={{ dpdk_dir }}/config/common_linuxapp
+        regexp=^{{ item.key }}=
+        line={{ item.key }}={{ item.value }}
+      with_items:
+        - key: CONFIG_RTE_BUILD_COMBINE_LIBS
+          value: y
+      register: dpdk_config_change
+    - name: Check if DPDK build exists
+      stat: path={{ dpdk_build }}
+      register: dpdk_build_status
+    - name: Build DPDK
+      command: make install T=x86_64-native-linuxapp-gcc chdir={{ dpdk_dir }}
+      when: (dpdk_build_status.stat.isdir is not defined) or (dpdk_rebuild is defined) or dpdk_config_change.changed or dpdk_changed.changed
+    - name: Create DPDK scripts
+      template: 
+        src: "templates/{{ item.name }}.j2" 
+        dest: "/root/{{ item.name }}"
+        mode: 0755
+      with_items: 
+        - name: dpdk_uio.sh
+          dpdk_build: '{{ dpdk_build }}'
+          dpdk_dir: '{{ dpdk_dir }}'
+          device_name: '{{ dpdk_device_name | default("eno1") }}'
+        - name: dpdk_vfio.sh
+          dpdk_build: '{{ dpdk_build }}'
+          dpdk_dir: '{{ dpdk_dir }}'
+          device_name: '{{ dpdk_device_name | default("eno1") }}'
