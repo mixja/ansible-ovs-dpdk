@@ -79,3 +79,5 @@ Create an OVS bridge with the datapath_type "netdev":
 Add DPDK devices:
 
 `ovs-vsctl add-port br0 dpdk0 -- set Interface dpdk0 type=dpdk`
+
+See the [OVS DPDK README](https://github.com/openvswitch/ovs/blob/master/INSTALL.DPDK.md) for further information.
